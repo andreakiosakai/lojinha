@@ -5,6 +5,8 @@ name = "pypi"
 
 [packages]
 django = "*"
+dj-database-url = "*"
+gunicorn = "*"
 
 [dev-packages]
 
