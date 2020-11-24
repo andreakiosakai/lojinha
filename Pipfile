@@ -8,6 +8,7 @@ django = "*"
 dj-database-url = "*"
 gunicorn = "*"
 psycopg2-binary = "*"
+model-mommy = "*"
 
 [dev-packages]
 

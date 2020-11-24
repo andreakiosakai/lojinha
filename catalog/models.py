@@ -4,7 +4,7 @@ from django.urls import reverse
 
 class Category(models.Model):
 
-    name = models.CharField('Nome', max_length=50)
+    name = models.CharField('Nome', max_length=100)
     slug = models.SlugField('Identificador', max_length=100)
 
     created_at = models.DateTimeField('Criado', auto_now_add=True)
