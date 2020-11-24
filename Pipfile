@@ -10,6 +10,7 @@ gunicorn = "*"
 psycopg2-binary = "*"
 model-mommy = "*"
 whitenoise = "*"
+django-widget-tweaks = "*"
 
 [dev-packages]
 
