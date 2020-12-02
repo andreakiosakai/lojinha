@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'core',
     'catalog',
     'widget_tweaks',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -147,6 +148,11 @@ DEFAULT_FROM_EMAIL = 'admin@lojinhasakai.com'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'index'
 LOGOUT_URL = 'logout'
+AUTH_USER_MODEL = 'accounts.User'
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'accounts.backends.ModelBackend',
+)
 
 try:
     from .local_settings import *
