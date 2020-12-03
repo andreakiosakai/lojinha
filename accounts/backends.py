@@ -1,6 +1,6 @@
 from django.contrib.auth.backends import ModelBackend as BaseModelBackend
 from django.contrib.auth import get_user_model
-
+from django.contrib import messages
 from .models import User
 
 class ModelBackend(BaseModelBackend):
@@ -11,5 +11,7 @@ class ModelBackend(BaseModelBackend):
                 user = User.objects.get(email=username)
                 if user.check_password(password):
                     return user
+                else:
+                    messages.error(user, 'Usuário / Senha inválidos')
             except User.DoesNotExist:
                 pass
