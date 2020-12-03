@@ -11,6 +11,7 @@ psycopg2-binary = "*"
 model-mommy = "*"
 whitenoise = "*"
 django-widget-tweaks = "*"
+pagseguro = "*"
 
 [dev-packages]
 
