@@ -1,3 +1,4 @@
+from pagseguro.api import PagSeguroItem, PagSeguroApi
 from django.db import models
 from django.conf import settings
 from catalog.models import Product
@@ -88,6 +89,33 @@ class Order(models.Model):
     def products(self):
         products_ids = self.items.values_list('product')
         return Product.objects.filter(pk__in=products_ids)
+
+    def total(self):
+        aggregate_queryset = self.items.aggregate(
+            total=models.Sum(
+                models.F('price') * models.F('quantity'),
+                output_field=models.DecimalField()
+            )
+        )
+        return aggregate_queryset['total']
+
+    def pagseguro(self):
+        self.payment_option = 'pagseguro'
+        self.save()
+        pg = PagSeguroApi(reference=self.id, 
+                            token=settings.PAGSEGURO_TOKEN, 
+                            email=settings.PAGSEGURO_EMAIL,
+                            senderEmail=self.user.email, 
+                            senderName=self.user.name)
+        for item in self.items.all():
+            pagseg_item = PagSeguroItem(id=item.product.pk, 
+                                        description=item.product.name,
+                                        amount=f'{item.price:.2f}',
+                                        quantity=item.quantity,
+                                        shipping_cost=None, 
+                                        weight=None)
+            pg.add_item(pagseg_item)
+        return pg
 
 class OrderItem(models.Model):
 

@@ -12,6 +12,7 @@ model-mommy = "*"
 whitenoise = "*"
 django-widget-tweaks = "*"
 pagseguro = "*"
+django-pagseguro2 = "*"
 
 [dev-packages]
 
