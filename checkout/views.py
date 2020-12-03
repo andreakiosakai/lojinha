@@ -7,6 +7,10 @@ from django.urls import reverse
 from catalog.models import Product
 from .models import CartItem, Order
 
+from paypal.standard.forms import PayPalPaymentsForm
+from paypal.standard.models import ST_PP_COMPLETED
+from paypal.standard.ipn.signals import valid_ipn_received
+
 
 class CreateCartItemView(RedirectView):
 
@@ -98,21 +102,48 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
         return Order.objects.filter(user=self.request.user)
 
 
-class PagSeguroView(LoginRequiredMixin, RedirectView):
-    
-    def get_redirect_url(self, *args, **kwargs):
+class PaypalView(LoginRequiredMixin, TemplateView):
+
+    template_name = 'checkout/paypal.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(PaypalView, self).get_context_data(**kwargs)
         order_pk = self.kwargs.get('pk')
         order = get_object_or_404(
-            Order.objects.filter(user=self.request.user), id=order_pk
+            Order.objects.filter(user=self.request.user), pk=order_pk
         )
-        pg = order.pagseguro()
-        data = pg.checkout()
-        if data['success']:
-            return data['redirect_url']
+        paypal_dict = order.paypal()
+        paypal_dict['return_url'] = self.request.build_absolute_uri(
+            reverse('checkout:order_list')
+        )
+        paypal_dict['cancel_return'] = self.request.build_absolute_uri(
+            reverse('checkout:order_list')
+        )
+        paypal_dict['notify_url'] = self.request.build_absolute_uri(
+            reverse('paypal-ipn')
+        )
+        context['form'] = PayPalPaymentsForm(initial=paypal_dict)
+        return context
+
+
+
+def paypal_notification(sender, **kwargs):
+    ipn_obj = sender
+    if ipn_obj.payment_status == ST_PP_COMPLETED and \
+        ipn_obj.receiver_email == settings.PAYPAL_EMAIL:
+        try:
+            order = Order.objects.get(pk=ipn_obj.invoice)
+            order.complete()
+        except Order.DoesNotExist:
+            pass
+
+
+valid_ipn_received.connect(paypal_notification)
+
 
 create_cartitem = CreateCartItemView.as_view()
 cart_item = CartItemView.as_view()
 checkout = CheckoutView.as_view()
 order_list = OrderListView.as_view() 
 order_detail = OrderDetailView.as_view()
-pagseguro = PagSeguroView.as_view()
+paypal_view = PaypalView.as_view()

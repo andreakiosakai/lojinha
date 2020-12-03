@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'checkout',
     'widget_tweaks',
     'accounts',
-    'pagseguro',
+    'paypal',
 ]
 
 MIDDLEWARE = [
@@ -171,6 +171,10 @@ MESSAGE_TAGS = {
 PAGSEGURO_TOKEN = os.getenv('PAGSEGURO_TOKEN')
 PAGSEGURO_EMAIL = 'andreakiosakai@gmail.com'
 PAGSEGURO_SANDBOX = True
+
+# Paypal
+PAYPAL_TEST = True
+PAYPAL_EMAIL = 'sb-kiwhp3955713@business.example.com'
 
 try:
     from .local_settings import *

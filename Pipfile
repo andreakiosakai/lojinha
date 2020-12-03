@@ -13,6 +13,7 @@ whitenoise = "*"
 django-widget-tweaks = "*"
 pagseguro = "*"
 django-pagseguro2 = "*"
+django-paypal = "*"
 
 [dev-packages]
 

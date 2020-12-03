@@ -99,23 +99,35 @@ class Order(models.Model):
         )
         return aggregate_queryset['total']
 
-    def pagseguro(self):
-        self.payment_option = 'pagseguro'
+    def pagseguro_update_status(self, status):
+        if status == '3':
+            self.status = 1
+        elif status == '7':
+            self.status = 2
         self.save()
-        pg = PagSeguroApi(reference=self.id, 
-                            token=settings.PAGSEGURO_TOKEN, 
-                            email=settings.PAGSEGURO_EMAIL,
-                            senderEmail=self.user.email, 
-                            senderName=self.user.name)
+
+    def complete(self):
+        self.status = 1
+        self.save()
+
+    def paypal(self):
+        self.payment_option = 'paypal'
+        self.save()
+        paypal_dict = {
+            'upload': '1',
+            'business': settings.PAYPAL_EMAIL,
+            'invoice': self.pk,
+            'cmd': '_cart',
+            'currency_code': 'BRL',
+            'charset': 'utf-8',
+        }
+        index = 1
         for item in self.items.all():
-            pagseg_item = PagSeguroItem(id=item.product.pk, 
-                                        description=item.product.name,
-                                        amount=f'{item.price:.2f}',
-                                        quantity=item.quantity,
-                                        shipping_cost=None, 
-                                        weight=None)
-            pg.add_item(pagseg_item)
-        return pg
+            paypal_dict['amount_{}'.format(index)] = '%.2f' % item.price
+            paypal_dict['item_name_{}'.format(index)] = item.product.name
+            paypal_dict['quantity_{}'.format(index)] = item.quantity
+            index = index + 1
+        return paypal_dict
 
 class OrderItem(models.Model):
 
