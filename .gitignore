@@ -64,4 +64,6 @@ target/
 #database
 db.sqlite3
 
+.vscode/
+
 local_settings.py
